@@ -1,4 +1,4 @@
-﻿namespace AoC2022.Tests;
+﻿namespace AoC2023.Tests;
 
 [TestClass]
 public abstract class DayTestsBase<T>(string expectedAnswerPart1, string expectedAnswerPart2) where T : IMDay, new()

@@ -1,4 +1,4 @@
-﻿namespace AoC2022.Tests;
+﻿namespace AoC2023.Tests;
 
 public class DayTestsWithTestDataBase<T>(
         string expectedAnswerPart1,
