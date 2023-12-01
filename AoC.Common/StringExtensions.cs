@@ -31,4 +31,7 @@ public static class StringExtensions
 
     public static int IndexOfClosingTag(this string value, int openTagIndex, char openTag, char closingTag) =>
         value.ToCharArray().IndexOfClosingTag(openTagIndex, openTag, closingTag);
+
+    public static int ParseToInt(this string value) =>
+        int.Parse(value);
 }
