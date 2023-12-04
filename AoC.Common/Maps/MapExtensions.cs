@@ -182,4 +182,39 @@ public static class MapExtensions
         map.CopyTo(newMap, new Point(startX, startY));
         return newMap;
     }
+
+    public static SpannedInt GetSpannedInt(this Map<char> map, Point point)
+    {
+        var value = map.GetValue(point);
+        if (!value.IsNumber())
+            throw new NotSupportedException($"{value} is not a number");
+
+        var start = point;
+        var totalValue = value.ToNumber();
+
+        for (var x = point.X - 1; x >= 0; x--)
+        {
+            Point left = new(x, point.Y);
+            var other = map.GetValue(left);
+            if (other.IsNumber())
+            {
+                start = left;
+                totalValue += other.ToNumber() * (int)Math.Pow(10, point.X - x);
+            }
+            else
+                break;
+        }
+
+        for (var x = point.X + 1; x < map.SizeX; x++)
+        {
+            Point right = new(x, point.Y);
+            var other = map.GetValue(right);
+            if (other.IsNumber())
+                totalValue = totalValue * 10 + other.ToNumber();
+            else
+                break;
+        }
+
+        return new(start, totalValue);
+    }
 }

@@ -137,8 +137,7 @@ public static class ArrayExtensions
 
     public static int IndexOfClosingTag<T>(this T[] source, int openTagIndex, T openTag, T closingTag)
     {
-        if (source is null)
-            throw new ArgumentNullException(nameof(source));
+        ArgumentNullException.ThrowIfNull(source);
 
         if (openTagIndex >= source.Length || openTagIndex < 0)
             throw new IndexOutOfRangeException(nameof(openTagIndex));

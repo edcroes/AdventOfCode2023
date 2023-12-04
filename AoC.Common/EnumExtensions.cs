@@ -1,6 +1,6 @@
 ﻿namespace AoC.Common;
 
-public static class EnumExtenions
+public static class EnumExtensions
 {
     public static T GetPrevious<T>(this T value) where T : Enum
     {
