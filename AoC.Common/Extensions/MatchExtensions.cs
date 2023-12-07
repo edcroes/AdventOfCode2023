@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace AoC.Common;
+namespace AoC.Common.Extensions;
 
 public static class MatchExtensions
 {

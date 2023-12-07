@@ -1,4 +1,4 @@
-﻿namespace AoC.Common;
+﻿namespace AoC.Common.Extensions;
 
 public static class DictionaryExtensions
 {
@@ -14,7 +14,7 @@ public static class DictionaryExtensions
         }
     }
 
-    public static void AddOrUpdate<T>(this IDictionary<T,int> dictionary, T key, int value)
+    public static void AddOrUpdate<T>(this IDictionary<T, int> dictionary, T key, int value)
     {
         if (dictionary.ContainsKey(key))
         {
@@ -80,7 +80,4 @@ public static class DictionaryExtensions
             dictionary.Remove(valueToRemove);
         }
     }
-
-    public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue @default) =>
-        dictionary.TryGetValue(key, out TValue? value) ? value : @default;
 }

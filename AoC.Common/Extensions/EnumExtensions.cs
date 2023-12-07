@@ -1,4 +1,4 @@
-﻿namespace AoC.Common;
+﻿namespace AoC.Common.Extensions;
 
 public static class EnumExtensions
 {

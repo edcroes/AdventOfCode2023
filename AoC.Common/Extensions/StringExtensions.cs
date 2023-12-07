@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace AoC.Common;
+namespace AoC.Common.Extensions;
 
 public static class StringExtensions
 {
@@ -34,4 +34,7 @@ public static class StringExtensions
 
     public static int ParseToInt(this string value) =>
         int.Parse(value);
+
+    public static long ParseToLong(this string value) =>
+        long.Parse(value);
 }

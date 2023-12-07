@@ -31,5 +31,7 @@ public static class LineParser
         var (x, y, z) = line.ToIntArray(separator);
         return new(x, y, z);
     }
-            
+
+    public static string[] ToStringArray(this string line, string separator) =>
+        line.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 }

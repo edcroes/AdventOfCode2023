@@ -1,5 +1,5 @@
-﻿namespace AoC.Common;
-public static  class IntExtensions
+﻿namespace AoC.Common.Extensions;
+public static class IntExtensions
 {
     public static int GetDigitCount(this int value)
     {
