@@ -33,5 +33,5 @@ public static class LineParser
     }
 
     public static string[] ToStringArray(this string line, string separator) =>
-        line.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+        line.Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }
