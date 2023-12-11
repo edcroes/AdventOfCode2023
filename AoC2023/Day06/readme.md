@@ -21,7 +21,7 @@ Now onto the real solution:
 This is a parabola that is hitting points `(0,0)` and `(time,0)`. The top is always at `(time / 2, (time / 2)^2)`.
 So if time is 8 then the top is at `(8 / 2, (8 / 2)^2)` => `(4, 16)`.
 
-With this information we can assemble the parabola formula where `p = xTop` and `$q = yTop`:
+With this information we can assemble the parabola formula where `p = xTop` and `q = yTop`:
 $$y = a * (x - p)^2 + q$$
 Since we always have the parabola going through `(0,0)` and $yTop = xTop^2$ we now can determine $a$:
 $$0 = a * (0 - xTop)^2 + xTop^2$$
@@ -139,4 +139,4 @@ public static int GetWins(int time, long distance)
 }
 ```
 
-And yes, this can be a one-lines, but it should remain readable.
+And yes, this can be a one-liner, but it should remain readable.
