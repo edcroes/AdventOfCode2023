@@ -1,12 +1,14 @@
-﻿namespace AoC.Common.Maps;
+﻿using System.Numerics;
 
-public class PointMap<T>
+namespace AoC.Common.Maps;
+
+public class PointMap<TPointType, TValue> where TPointType : INumber<TPointType>
 {
-    private readonly Dictionary<Point, T> _points = new();
+    private readonly Dictionary<Point<TPointType>, TValue> _points = [];
 
     public PointMap() { }
 
-    public PointMap(T[][] values, bool insertDefaultValue = false)
+    public PointMap(TValue[][] values, bool insertDefaultValue = false)
     {
         for (var y = 0; y < values.Length; y++)
         {
@@ -14,69 +16,72 @@ public class PointMap<T>
             {
                 if ((values[y][x] != null && !values[y][x]!.Equals(default)) || insertDefaultValue)
                 {
-                    SetValue(new(x, y), values[y][x]);
+                    SetValue(new(TPointType.CreateChecked(x), TPointType.CreateChecked(y)), values[y][x]);
                 }
             }
         }
     }
 
-    public List<Point> Points =>
+    public IReadOnlyList<Point<TPointType>> Points =>
         _points.Keys.ToList();
 
-    public T GetValue(int x, int y) =>
+    public TValue GetValue(TPointType x, TPointType y) =>
         GetValue(new(x, y));
 
-    public T GetValue(Point point) =>
-        _points.TryGetValue(point, out T? value) ? value : throw new ArgumentOutOfRangeException(nameof(point));
+    public TValue GetValue(Point<TPointType> point) =>
+        _points.TryGetValue(point, out TValue? value) ? value : throw new ArgumentOutOfRangeException(nameof(point));
 
-    public T? GetValueOrDefault(int x, int y, T defaultValue = default) =>
+    public TValue? GetValueOrDefault(TPointType x, TPointType y, TValue defaultValue = default) =>
         GetValueOrDefault(new(x, y), defaultValue);
 
-    public T? GetValueOrDefault(Point point, T defaultValue = default) =>
-        _points.TryGetValue(point, out T? value) ? value : defaultValue;
+    public TValue? GetValueOrDefault(Point<TPointType> point, TValue defaultValue = default) =>
+        _points.TryGetValue(point, out TValue? value) ? value : defaultValue;
 
-    public void SetValue(int x, int y, T value) =>
+    public void SetValue(TPointType x, TPointType y, TValue value) =>
         SetValue(new(x, y), value);
 
-    public void SetValue(Point point, T value) =>
+    public void SetValue(Point<TPointType> point, TValue value) =>
         _points.AddOrSet(point, value);
 
-    public void RemoveValue(Point point) =>
+    public void RemoveValue(Point<TPointType> point) =>
         _points.Remove(point);
 
-    public IEnumerable<Point> GetStraightAndDiagonalNeighbors(Point point)
+    public IEnumerable<Point<TPointType>> GetStraightAndDiagonalNeighbors(Point<TPointType> point)
     {
-        List<Point> neighbors = new();
+        List<Point<TPointType>> neighbors = [];
 
-        for (int y = point.Y - 1; y <= point.Y + 1; y++)
+        for (var y = point.Y - TPointType.One; y <= point.Y + TPointType.One; y++)
         {
-            for (int x = point.X - 1; x <= point.X + 1; x++)
+            for (var x = point.X - TPointType.One; x <= point.X + TPointType.One; x++)
             {
                 if (y == point.Y && x == point.X)
                 {
                     continue;
                 }
 
-                neighbors.Add(new Point(x, y));
+                neighbors.Add(new Point<TPointType>(x, y));
             }
         }
 
         return neighbors;
     }
 
-    public int NumberOfStraightAndDiagonalNeighborsThatMatch(Point point, T valueToMatch) =>
-        NumberOfStraightAndDiagonalNeighborsThatMatch(point, p => _points.TryGetValue(p, out T? value) && valueToMatch.Equals(value));
+    public int NumberOfStraightAndDiagonalNeighborsThatMatch(Point<TPointType> point, TValue valueToMatch) =>
+        NumberOfStraightAndDiagonalNeighborsThatMatch(point, p => _points.TryGetValue(p, out TValue? value) && valueToMatch.Equals(value));
 
-    public int NumberOfStraightAndDiagonalNeighborsThatMatch(Point point, Func<Point, bool> getMatch) =>
+    public int NumberOfStraightAndDiagonalNeighborsThatMatch(Point<TPointType> point, Func<Point<TPointType>, bool> getMatch) =>
         GetStraightAndDiagonalNeighbors(point).Count(getMatch);
 
-    public Rectangle GetBoundingRectangle()
+    public Rectangle<TPointType> GetBoundingRectangle()
     {
+        if (_points.Keys.Count == 0)
+            throw new InvalidOperationException("Unable to determine the bounding rectangle of a map without points");
+
         var minX = _points.Keys.Min(p => p.X);
         var maxX = _points.Keys.Max(p => p.X);
         var minY = _points.Keys.Min(p => p.Y);
         var maxY = _points.Keys.Max(p => p.Y);
 
-        return new(minX, minY, maxX - minX, maxY - minY);
+        return new(minX!, minY!, maxX! - minX!, maxY! - minY!);
     }
 }
