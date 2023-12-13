@@ -217,4 +217,45 @@ public static class MapExtensions
 
         return new(start, totalValue);
     }
+
+    public static int GetMirrorOnX<T>(this Map<T> map, int skipX = -1, int faultsToAllow = 0)
+    {
+        for (var x = 0; x < map.SizeX - 1; x++)
+        {
+            if (x == skipX)
+                continue;
+
+            var current = map.GetLine(x, 0, x, map.SizeY - 1);
+            var next = map.GetLine(x + 1, 0, x + 1, map.SizeY - 1);
+            var nonMatching = current.GetNumberOfNonMatchingElements(next);
+
+            if (nonMatching < faultsToAllow + 1)
+            {
+                var move = 1;
+                while (x + move + 1 < map.SizeX && x - move >= 0)
+                {
+                    var left = map.GetLine(x - move, 0, x - move, map.SizeY - 1);
+                    var right = map.GetLine(x + move + 1, 0, x + move + 1, map.SizeY - 1);
+
+                    nonMatching += left.GetNumberOfNonMatchingElements(right);
+                    if (nonMatching > faultsToAllow)
+                        move = int.MaxValue;
+                    else
+                        move++;
+                }
+
+                if (move != int.MaxValue)
+                    return x;
+            }
+        }
+
+        return -1;
+    }
+
+    public static int GetMirrorOnY<T>(this Map<T> map, int skipY = -1, int faultsToAllow = 0)
+    {
+        var newMap = map.Clone();
+        newMap.RotateLeft();
+        return GetMirrorOnX(newMap, skipY, faultsToAllow);
+    }
 }

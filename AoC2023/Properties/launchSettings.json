@@ -1,8 +1,7 @@
 {
   "profiles": {
-    "AoC2022": {
-      "commandName": "Project",
-      "commandLineArgs": ""
+    "AoC2023": {
+      "commandName": "Project"
     }
   }
 }

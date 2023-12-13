@@ -178,4 +178,23 @@ public static class ArrayExtensions
         value3 = source.ElementAtOrDefault(2);
         value4 = source.ElementAtOrDefault(3);
     }
+
+    public static int GetNumberOfNonMatchingElements<T>(this T[] source, T[] other)
+    {
+        if (source is null || other is null || source.Length != other.Length)
+            throw new ArgumentException("Both source and other should have a value and should have the same number of elements");
+
+        var nonMatching = 0;
+        for (var i = 0; i < source.Length; i++)
+        {
+            if ((source[i] is null && other[i] is not null) ||
+                (source[i] is not null && other[i] is null) ||
+                (source[i] is not null && !source[i]!.Equals(other[i])))
+            {
+                nonMatching++;
+            }
+        }
+
+        return nonMatching;
+    }
 }
