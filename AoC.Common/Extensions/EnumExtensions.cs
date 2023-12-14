@@ -21,4 +21,7 @@ public static class EnumExtensions
 
     private static T ToEnum<T>(this int value) where T : Enum =>
         (T)(object)value;
+
+    public static bool IsIn<T>(this T value, params T[] values) =>
+        values.Contains(value);
 }

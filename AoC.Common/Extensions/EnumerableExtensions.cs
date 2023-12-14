@@ -6,4 +6,7 @@ public static class EnumerableExtensions
         sources
             .Skip(1)
             .Aggregate(sources.First(), (result, next) => result.Intersect(next));
+
+    public static int GetAoCHashCode<T>(this IEnumerable<T> source) =>
+        source.Aggregate(0, (result, next) => next is null ? result : HashCode.Combine(result, next.GetHashCode()));
 }

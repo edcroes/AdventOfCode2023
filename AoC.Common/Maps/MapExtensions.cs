@@ -71,19 +71,6 @@ public static class MapExtensions
         return count;
     }
 
-    public static Map<T> ForEach<T>(this Map<T> map, Action<Point, T> action)
-    {
-        for (int y = 0; y < map.SizeY; y++)
-        {
-            for (int x = 0; x < map.SizeX; x++)
-            {
-                action(new Point(x, y), map.GetValue(x, y));
-            }
-        }
-
-        return map;
-    }
-
     public static bool All<T>(this Map<T> map, Func<Point, T, bool> predicate)
     {
         for (var y = 0; y < map.SizeY; y++)
