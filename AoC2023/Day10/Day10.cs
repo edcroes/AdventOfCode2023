@@ -1,17 +1,9 @@
+using AoC.Common.Maps;
+
 namespace AoC2023.Day10;
 
 public class Day10 : IMDay
 {
-    private Dictionary<PipeExit, (Point[] inner, Point[] outer)> _neighbors = new()
-    {
-        { new('F', new( 1,  0)), ([new(1, 1)], [new(-1, -1), new(-1, 0), new(-1, 1), new(0, -1), new(1, -1)]) },
-        { new('|', new( 0,  1)), ([new(-1, -1), new(-1, 0), new(-1, 1)], [new(1, -1), new(1, 0), new(1, 1)]) },
-        { new('J', new(-1,  0)), ([new(-1, -1)], [new(1, -1), new(1, 0), new(1, 1), new(-1, 1), new(0, 1)]) },
-        { new('-', new(-1,  0)), ([new(-1, -1), new(0, -1), new(1, -1)], [new(-1, 1), new(0, 1), new(1, 1)]) },
-        { new('L', new( 0, -1)), ([new(1, -1)], [new(-1, -1), new(-1, 0), new(-1, 1), new(0, 1), new(1, 1)]) },
-        { new('7', new( 0,  1)), ([new(-1, 1)], [new(-1, -1), new(0, -1), new(1, -1), new(1, 0), new(1, 1)]) }
-    };
-
     private static readonly Dictionary<char, Point[]> _pipes = new()
     {
         { 'F', new Point[] { new(1, 0), new(0, 1) } },
@@ -25,16 +17,6 @@ public class Day10 : IMDay
 
     public string FilePath { private get; init; } = "Day10\\input.txt";
 
-    public Day10()
-    {
-        AddOtherExit('F', new( 1,  0), new( 0,  1));
-        AddOtherExit('|', new( 0,  1), new( 0, -1));
-        AddOtherExit('J', new(-1,  0), new( 0, -1));
-        AddOtherExit('-', new(-1,  0), new( 1,  0));
-        AddOtherExit('L', new( 0, -1), new( 1,  0));
-        AddOtherExit('7', new( 0,  1), new(-1,  0));
-    }
-
     public async Task<string> GetAnswerPart1()
     {
         var map = await GetInput();
@@ -46,85 +28,34 @@ public class Day10 : IMDay
         var map = (await GetInput()).EnlargeMapByOneOnEachSide('.');
         var pipes = GetPipelinePipes(map);
 
-        var pipePoints = pipes.Select(p => p.Point).ToList();
-        var allOuters = pipes.SelectMany(p => p.Outer).Where(p => !pipePoints.Contains(p)).Distinct().ToList();
-        var allInners = pipes.SelectMany(p => p.Inner).Where(p => !pipePoints.Contains(p)).Distinct().ToList();
-
-        var openPoints = map.Where((p, v) => !allOuters.Contains(p) && !allInners.Contains(p) && !pipePoints.Contains(p));
-        foreach (var open in openPoints)
-        {
-            if (map.GetStraightNeighbors(open).Any(allInners.Contains))
-                allInners.Add(open);
-            else if (map.GetStraightNeighbors(open).Any(allOuters.Contains))
-                allOuters.Add(open);
-        }
-
-        openPoints = map.Where((p, v) => !allOuters.Contains(p) && !allInners.Contains(p) && !pipePoints.Contains(p)).Reverse();
-        foreach (var open in openPoints)
-        {
-            if (map.GetStraightNeighbors(open).Any(allInners.Contains))
-                allInners.Add(open);
-            else if (map.GetStraightNeighbors(open).Any(allOuters.Contains))
-                allOuters.Add(open);
-        }
-
-        if (allInners.Min(p => p.X) > allOuters.Min(p => p.X))
-            return allInners.Count.ToString();
-        else
-            return allOuters.Count.ToString();
+        map.FillShape(pipes, 'P', '#');
+        return map.Count('#').ToString();
     }
 
-    private List<Pipe> GetPipelinePipes(Map<char> map)
+    private List<Point> GetPipelinePipes(Map<char> map)
     {
         var start = map!.First((p, v) => v == 'S');
-        List<Pipe> pipes = [new(start, 'S', [], [])];
+        List<Point> pipes = [start];
 
-        Pipe currentPipe = GetNextPipe(map, pipes[0], start);
-        Point previousPoint = start;
+        var currentPipe = GetNextPipe(map, pipes[0], start);
+        Point previousPipe = start;
 
-        while (currentPipe.Point != start)
+        while (currentPipe != start)
         {
             pipes.Add(currentPipe);
-            var newPipe = GetNextPipe(map, currentPipe, previousPoint);
-            previousPoint = currentPipe.Point;
+            var newPipe = GetNextPipe(map, currentPipe, previousPipe);
+            previousPipe = currentPipe;
             currentPipe = newPipe;
         }
 
         return pipes;
     }
 
-    private Pipe GetNextPipe(Map<char> map, Pipe currentPipe, Point previousPoint)
-    {
-        var nextPoint = _pipes[currentPipe.Type]
-            .Select(p => currentPipe.Point.Add(p))
-            .First(p => p != previousPoint && map.GetValueOrDefault(p, '.') != '.' && _pipes[map.GetValue(p)].Any(d => p.Add(d) == currentPipe.Point));
-
-        var pipeValue = map.GetValue(nextPoint);
-        Point[] inner = [];
-        Point[] outer = [];
-
-        if (pipeValue != 'S')
-        {
-            var exit = _pipes[pipeValue].Single(p => nextPoint.Add(p) != currentPipe.Point);
-            (inner, outer) = _neighbors[new PipeExit(pipeValue, exit)];
-        }
-
-        return new(
-            nextPoint,
-            pipeValue,
-            inner.Select(p => nextPoint.Add(p)).Where(map.Contains).ToArray(),
-            outer.Select(p => nextPoint.Add(p)).Where(map.Contains).ToArray());
-    }
-
-    private void AddOtherExit(char type, Point exit, Point otherExit)
-    {
-        var (inner, outer) = _neighbors[new(type, exit)];
-        _neighbors.Add(new(type, otherExit), (outer, inner));
-    }
+    private static Point GetNextPipe(Map<char> map, Point currentPipe, Point previousPipe) =>
+        _pipes[map.GetValue(currentPipe)]
+            .Select(p => currentPipe.Add(p))
+            .First(p => p != previousPipe && map.GetValueOrDefault(p, '.') != '.' && _pipes[map.GetValue(p)].Any(d => p.Add(d) == currentPipe));
 
     private async Task<Map<char>> GetInput() =>
         new(await FileParser.ReadLinesAsCharArray(FilePath));
-
-    private record struct Pipe(Point Point, char Type, Point[] Inner, Point[] Outer);
-    private record struct PipeExit(char Type, Point Exit);
 }
