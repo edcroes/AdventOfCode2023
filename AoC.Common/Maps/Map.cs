@@ -175,7 +175,7 @@ public class Map<T>
                 new Point(point.X, point.Y + 1)
         };
 
-        return neighbors.Where(p => Contains(p));
+        return neighbors.Where(Contains);
     }
 
     public IEnumerable<Point> GetStraightAndDiagonalNeighbors(Point point)
