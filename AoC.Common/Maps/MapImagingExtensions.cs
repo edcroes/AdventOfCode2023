@@ -3,22 +3,22 @@ public static class MapImagingExtensions
 {
     private static readonly Dictionary<(Point previous, Point next), (Point[] inner, Point[] outer)> _innerOuterTranslation = new()
     {
-        // -
+        // ═
         { (new(-1, 0), new(1, 0)), ([new(0, 1)], [new(0, -1)]) },
         { (new(1, 0), new(-1, 0)), ([new(0, -1)], [new(0, 1)]) },
-        // |
+        // ║
         { (new(0, -1), new(0, 1)), ([new(-1, 0)], [new(1, 0)]) },
         { (new(0, 1), new(0, -1)), ([new(1, 0)], [new(-1, 0)]) },
-        // F
+        // ╔
         { (new(0, 1), new(1, 0)), ([], [new(-1, 0), new(-1, -1), new(0, -1)]) },
         { (new(1, 0), new(0, 1)), ([new(-1, 0), new(-1, -1), new(0, -1)], []) },
-        // L
+        // ╚
         { (new(1, 0), new(0, -1)), ([], [new(-1, 0), new(-1, 1), new(0, 1)]) },
         { (new(0, -1), new(1, 0)), ([new(-1, 0), new(-1, 1), new(0, 1)], []) },
-        // 7
+        // ╗
         { (new(-1, 0), new(0, 1)), ([], [new(0, -1), new(1, -1), new(1, 0)]) },
         { (new(0, 1), new(-1, 0)), ([new(0, -1), new(1, -1), new(1, 0)], []) },
-        // J
+        // ╝
         { (new(0, -1), new(-1, 0)), ([], [new(1, 0), new(1, 1), new(0, 1)]) },
         { (new(-1, 0), new(0, -1)), ([new(0, -1), new(1, -1), new(1, 0)], []) }
     };
