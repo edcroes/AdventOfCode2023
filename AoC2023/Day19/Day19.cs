@@ -38,8 +38,6 @@ public class Day19 : IMDay
 
     private static long GetPossibilities(GraphedInstruction instruction, Dictionary<string, GraphedInstruction> allInstructions, Ranges currentRange)
     {
-        Console.WriteLine($"{instruction.Name}: {currentRange}");
-
         if (!currentRange.IsValid)
             return 0;
 
@@ -47,7 +45,7 @@ public class Day19 : IMDay
             return 0;
 
         if (instruction.Name == "A")
-            return currentRange.X.Length * currentRange.X.Length * currentRange.A.Length * currentRange.S.Length;
+            return currentRange.X.Length * currentRange.M.Length * currentRange.A.Length * currentRange.S.Length;
 
         var total = 0L;
         foreach (var child in instruction.Children)
@@ -55,15 +53,11 @@ public class Day19 : IMDay
             var other = currentRange;
             if (child.Condition is not null)
             {
-                Console.WriteLine($"[{instruction.Name}]  {child}");
                 var (left, right) = child.Condition.Value.GetNewRanges(currentRange);
                 currentRange = child.Condition.Value.Check == '<' ? right : left;
                 other = child.Condition.Value.Check == '<' ? left : right;
-
-                Console.WriteLine($"[{instruction.Name}]  To function: {other}");
-                Console.WriteLine($"[{instruction.Name}]  Remaining: {currentRange}");
             }
-            Console.WriteLine($"[{instruction.Name}]  [{child.Name}]: {other}");
+
             total += GetPossibilities(allInstructions[child.Name], allInstructions, other);
         }
 
@@ -94,6 +88,9 @@ public class Day19 : IMDay
         return Expression.Lambda<Func<Part, bool>>(block, parameter).Compile();
     }
 
+    private static bool CallFunction(string name, Part part) =>
+        _functions[name](part);
+
     private static ConditionalExpression ParseStep(string step, ParameterExpression parameter, ParameterExpression variable, LabelTarget returnLabel, MethodInfo callFunction)
     {
         var (condition, ret) = step.Split(':');
@@ -116,9 +113,6 @@ public class Day19 : IMDay
 
         return Expression.IfThen(testExp, Expression.Block(Expression.Assign(variable, assign), Expression.Return(returnLabel)));
     }
-
-    private static bool CallFunction(string name, Part part) =>
-        _functions[name](part);
 
     private static GraphedInstruction ParseGraphedInstruction(Instruction instruction)
     {
@@ -165,7 +159,9 @@ public class Day19 : IMDay
     private async Task<string[][]> GetInput() =>
         await FileParser.ReadBlocksAsStringArray(FilePath);
 
+
     private record struct Instruction(string Name, string[] Instructions);
+    
     private record struct Part(int X, int M, int A, int S);
 
     private record struct Condition(char Property, char Check, long Value)
@@ -183,23 +179,12 @@ public class Day19 : IMDay
                 'S' when Check == '>' => current.SplitOnS(Value, true),
                 _ => throw new NotSupportedException("Strange...")
             };
-
-        public readonly override string ToString() =>
-            $"{Property} {Check} {Value}";
     };
 
-    private record struct ConditionalInstruction(string Name, Condition? Condition)
-    {
-        public readonly override string ToString()
-        {
-            if (Condition is not null)
-                return $"{Name}: {Condition}";
-
-            return Name;
-        }
-    }
+    private record struct ConditionalInstruction(string Name, Condition? Condition);
 
     private record GraphedInstruction(string Name, ConditionalInstruction[] Children);
+
     private record struct Ranges(AoCRange X, AoCRange M, AoCRange A, AoCRange S)
     {
         public readonly bool IsValid =>
@@ -220,11 +205,5 @@ public class Day19 : IMDay
         public readonly (Ranges left, Ranges right) SplitOnS(long value, bool includeValueLeft = true) =>
             (new Ranges(X, M, A, AoCRange.New(S.Start, value - (includeValueLeft ? 0 : 1))),
              new Ranges(X, M, A, AoCRange.New(value + (includeValueLeft ? 1 : 0), S.End)));
-
-        public readonly override string ToString()
-        {
-            var invalid = !IsValid ? " INVALID" : string.Empty;
-            return $"X: {X}, M: {M}, A: {A}, S: {S}{invalid}";
-        }
     };
 }

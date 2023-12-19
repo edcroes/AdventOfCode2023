@@ -25,4 +25,10 @@ public record struct AoCRange(long Start, long Length)
         var newEnd = Math.Min(End, other.End);
         return new(newStart, newEnd - newStart + 1);
     }
+
+    public static AoCRange New(long start, long end) =>
+        new (start, end - start + 1);
+
+    public override string ToString() =>
+        $"{Start} -> {End} ({Length})";
 }
