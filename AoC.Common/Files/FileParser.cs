@@ -56,7 +56,7 @@ public static class FileParser
     public static async Task<string[][]> ReadLinesAsStringArray(string filePath, string separator) =>
         (await File.ReadAllLinesAsync(filePath))
             .Where(l => l.IsNotNullOrEmpty())
-            .Select(l => l.Split(separator, StringSplitOptions.RemoveEmptyEntries))
+            .Select(l => l.Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             .ToArray();
 
     public static async Task<char[][]> ReadLinesAsCharArray(string filePath) =>
