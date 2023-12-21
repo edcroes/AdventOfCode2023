@@ -1,10 +1,13 @@
-﻿namespace AoC2023.Tests;
+﻿using AoC.Common.Extensions;
+
+namespace AoC2023.Tests;
 
 public class DayTestsWithTestDataBase<T>(
         string expectedAnswerPart1,
         string expectedAnswerPart2,
         string expectedAnswerPart1TestData,
-        string expectedAnswerPart2TestData) : DayTestsBase<T>(expectedAnswerPart1, expectedAnswerPart2) where T : IMDay, new()
+        string expectedAnswerPart2TestData,
+        string? testDataPart2 = null) : DayTestsBase<T>(expectedAnswerPart1, expectedAnswerPart2) where T : IMDay, new()
 {
     private readonly IMDay _dayWithTestDataToTest = new T() { FilePath = $"TestData\\{typeof(T).Name}-testinput.txt" };
 
@@ -18,7 +21,11 @@ public class DayTestsWithTestDataBase<T>(
     [TestMethod]
     public async Task Part2WithTestDataTest()
     {
-        var answerPart2 = await _dayWithTestDataToTest.GetAnswerPart2();
+        var sut = testDataPart2.IsNotNullOrEmpty()
+            ? new T() { FilePath = $"TestData\\{testDataPart2}" }
+            : _dayWithTestDataToTest;
+
+        var answerPart2 = await sut.GetAnswerPart2();
         Assert.AreEqual(expectedAnswerPart2TestData, answerPart2);
     }
 }

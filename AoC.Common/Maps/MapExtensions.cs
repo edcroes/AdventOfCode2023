@@ -71,6 +71,23 @@ public static class MapExtensions
         return count;
     }
 
+    public static int Count<T>(this Map<T> map, Func<Point, T, bool> predicate)
+    {
+        int count = 0;
+        for (int y = 0; y < map.SizeY; y++)
+        {
+            for (int x = 0; x < map.SizeX; x++)
+            {
+                if (predicate(new(x, y), map.GetValue(x, y)))
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
     public static bool All<T>(this Map<T> map, Func<Point, T, bool> predicate)
     {
         for (var y = 0; y < map.SizeY; y++)

@@ -136,10 +136,10 @@ public class Map<T>
 
     public void DistributeChaos(T aliveValue, Func<bool, int, T> getNewValue)
     {
-        DistributeChaos(aliveValue, (map, point) => NumberOfStraightAndDiagonalNeighborsThatMatch(map, point, aliveValue), getNewValue);
+        DistributeChaos(aliveValue, (_, _) => true, (map, point) => NumberOfStraightAndDiagonalNeighborsThatMatch(map, point, aliveValue), getNewValue);
     }
 
-    public void DistributeChaos(T aliveValue, Func<Map<T>, Point, int> getNumberOfNeighborsThatMatch, Func<bool, int, T> getNewValue)
+    public void DistributeChaos(T aliveValue, Func<Point, T, bool> canChange, Func<Map<T>, Point, int> getNumberOfNeighborsThatMatch, Func<bool, int, T> getNewValue)
     {
         var pointsToChange = new Dictionary<Point, T>();
 
@@ -148,13 +148,17 @@ public class Map<T>
             for (int x = 0; x < SizeX; x++)
             {
                 var currentPoint = new Point(x, y);
-                var currentValue = GetValue(currentPoint.X, currentPoint.Y);
-                var matches = getNumberOfNeighborsThatMatch(this, currentPoint);
+                var currentValue = GetValue(currentPoint);
 
-                var newValue = getNewValue(aliveValue.Equals(currentValue), matches);
-                if (!newValue.Equals(currentValue))
+                if (canChange(currentPoint, currentValue))
                 {
-                    pointsToChange.Add(currentPoint, newValue);
+                    var matches = getNumberOfNeighborsThatMatch(this, currentPoint);
+
+                    var newValue = getNewValue(aliveValue.Equals(currentValue), matches);
+                    if (!newValue.Equals(currentValue))
+                    {
+                        pointsToChange.Add(currentPoint, newValue);
+                    }
                 }
             }
         }
