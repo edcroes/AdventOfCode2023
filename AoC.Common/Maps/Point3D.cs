@@ -1,17 +1,10 @@
 ﻿namespace AoC.Common.Maps;
 
-public struct Point3D : IEquatable<Point3D>
+public readonly struct Point3D(int x, int y, int z) : IEquatable<Point3D>
 {
-    public int X { get; set; }
-    public int Y { get; set; }
-    public int Z { get; set; }
-
-    public Point3D(int x, int y, int z)
-    {
-        X = x;
-        Y = y;
-        Z = z;
-    }
+    public int X { get; } = x;
+    public int Y { get; } = y;
+    public int Z { get; } = z;
 
     public static Point3D Empty => new(0, 0, 0);
 
