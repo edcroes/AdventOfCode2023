@@ -1,4 +1,5 @@
-﻿using AoC.Common.Geometry;
+﻿using System.Numerics;
+using AoC.Common.Geometry;
 
 namespace AoC.Common.AoCMath;
 
@@ -45,7 +46,7 @@ public static class AoCMath
     public static long LeastCommonMultiple(IEnumerable<long> values) =>
         values.Aggregate(LeastCommonMultiple);
 
-    public static double GetPolygonAreaWithBorder(IEnumerable<Point> verticesAntiClockwise)
+    public static double GetPolygonAreaWithBorder(IEnumerable<Point<long>> verticesAntiClockwise)
     {
         var vertices = verticesAntiClockwise.ToArray();
         var sum1 = 0L;
@@ -63,7 +64,7 @@ public static class AoCMath
         return (double)Math.Abs(sum1 - sum2) / 2 + borderLength / 2 + 1;
     }
 
-    public static double GetPolygonArea(IEnumerable<Point> verticesAntiClockwise)
+    public static double GetPolygonArea(IEnumerable<Point<long>> verticesAntiClockwise)
     {
         var vertices = verticesAntiClockwise.ToArray();
         var sum1 = 0L;
@@ -72,8 +73,8 @@ public static class AoCMath
         for (var i = 0; i < vertices.Length; i++)
         {
             var next = i == vertices.Length - 1 ? vertices[0] : vertices[i + 1];
-            sum1 += (long)vertices[i].X * next.Y;
-            sum2 += (long)vertices[i].Y * next.X;
+            sum1 += vertices[i].X * next.Y;
+            sum2 += vertices[i].Y * next.X;
         }
 
         return (double)Math.Abs(sum1 - sum2) / 2;

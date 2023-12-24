@@ -1,16 +1,7 @@
 ﻿namespace AoC.Common.Geometry;
 
-public readonly struct Line
+public readonly record struct Line(Point<long> From, Point<long> To)
 {
-    public Point From { get; init; }
-    public Point To { get; init; }
-
-    public Line(Point from, Point to)
-    {
-        From = from;
-        To = to;
-    }
-
     public double Length
     {
         get
@@ -19,6 +10,7 @@ public readonly struct Line
             var lengthY = Math.Abs(To.Y - From.Y);
             if (lengthY == 0) return lengthX;
             if (lengthX == 0) return lengthY;
+
             return Math.Sqrt(lengthX * lengthX + lengthY * lengthY);
         }
     }
@@ -68,21 +60,21 @@ public readonly struct Line
             : null;
     }
 
-    public IEnumerable<Point> GetLinePoints()
+    public IEnumerable<Point<long>> GetLinePoints()
     {
         if (From.X != To.X && From.Y != To.Y && Math.Abs(From.Y - To.Y) != Math.Abs(From.X - To.X))
         {
             throw new InvalidOperationException("Only points for horizontal, vertical or 45 degree lines can be determined");
         }
 
-        List<Point> points = new() { From };
+        List<Point<long>> points = [From];
         var xStep = From.X < To.X ? 1 : From.X > To.X ? -1 : 0;
         var yStep = From.Y < To.Y ? 1 : From.Y > To.Y ? -1 : 0;
 
         var nextPoint = From;
         while (nextPoint != To)
         {
-            nextPoint = new Point(nextPoint.X + xStep, nextPoint.Y + yStep);
+            nextPoint = new Point<long>(nextPoint.X + xStep, nextPoint.Y + yStep);
             points.Add(nextPoint);
         }
 

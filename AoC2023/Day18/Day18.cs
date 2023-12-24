@@ -18,8 +18,8 @@ public class Day18 : IMDay
 
     private static double GetArea(Border[] borders)
     {
-        Point lastPoint = new(0, 0);
-        List<Point> vertices = [lastPoint];
+        Point<long> lastPoint = new(0, 0);
+        List<Point<long>> vertices = [lastPoint];
 
         foreach (var line in borders)
         {

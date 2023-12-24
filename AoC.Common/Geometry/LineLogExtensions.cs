@@ -27,7 +27,7 @@ public static class LineLogExtensions
         {
             for (var x = 0; x <= maxX; x++)
             {
-                Point point = new(x, y);
+                Point<long> point = new(x, y);
                 var draw = allPoints.Contains(point)
                     ? '#'
                     : '.';
