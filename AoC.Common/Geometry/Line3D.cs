@@ -1,51 +1,53 @@
-﻿namespace AoC.Common.Geometry;
+﻿using System.Numerics;
 
-public readonly struct Line3D(Point3D from, Point3D to) : IEquatable<Line3D>
+namespace AoC.Common.Geometry;
+
+public readonly struct Line3D<T>(Point3D<T> from, Point3D<T> to) : IEquatable<Line3D<T>> where T : INumber<T>
 {
-    public Point3D From { get; } = new(Math.Min(from.X, to.X), Math.Min(from.Y, to.Y), Math.Min(from.Z, to.Z));
-    public Point3D To { get; } = new(Math.Max(from.X, to.X), Math.Max(from.Y, to.Y), Math.Max(from.Z, to.Z));
+    public Point3D<T> From { get; } = new(T.Min(from.X, to.X), T.Min(from.Y, to.Y), T.Min(from.Z, to.Z));
+    public Point3D<T> To { get; } = new(T.Max(from.X, to.X), T.Max(from.Y, to.Y), T.Max(from.Z, to.Z));
 
-    public long CubeCount =>
-        (To.X - From.X + 1L) *
-        (To.Y - From.Y + 1L) *
-        (To.Z - From.Z + 1L);
+    public T CubeCount =>
+        (To.X - From.X + T.One) *
+        (To.Y - From.Y + T.One) *
+        (To.Z - From.Z + T.One);
 
-    public static Line3D Empty => new(Point3D.Empty, Point3D.Empty);
+    public static Line3D<T> Empty => new(Point3D<T>.Empty, Point3D<T>.Empty);
 
-    public Line3D Intersect(Line3D other)
+    public Line3D<T> Intersect(Line3D<T> other)
     {
         if (!HasOverlapWith(other))
             return Empty;
 
-        Point3D from = new(
-            Math.Max(From.X, other.From.X),
-            Math.Max(From.Y, other.From.Y),
-            Math.Max(From.Z, other.From.Z)
+        Point3D<T> from = new(
+            T.Max(From.X, other.From.X),
+            T.Max(From.Y, other.From.Y),
+            T.Max(From.Z, other.From.Z)
         );
-        Point3D to = new(
-            Math.Min(To.X, other.To.X),
-            Math.Min(To.Y, other.To.Y),
-            Math.Min(To.Z, other.To.Z)
+        Point3D<T> to = new(
+            T.Min(To.X, other.To.X),
+            T.Min(To.Y, other.To.Y),
+            T.Min(To.Z, other.To.Z)
         );
 
         return new(from, to);
     }
 
-    public bool HasOverlapWith(Line3D other) =>
+    public bool HasOverlapWith(Line3D<T> other) =>
         From.X <= other.To.X && To.X >= other.From.X &&
         From.Y <= other.To.Y && To.Y >= other.From.Y &&
         From.Z <= other.To.Z && To.Z >= other.From.Z;
 
-    public bool HasOverlapOnXAndYWith(Line3D other) =>
+    public bool HasOverlapOnXAndYWith(Line3D<T> other) =>
         From.X <= other.To.X && To.X >= other.From.X &&
         From.Y <= other.To.Y && To.Y >= other.From.Y;
 
-    public bool Contains(Line3D other) =>
+    public bool Contains(Line3D<T> other) =>
         From.X <= other.From.X && To.X >= other.To.X &&
         From.Y <= other.From.Y && To.Y >= other.To.Y &&
         From.Z <= other.From.Z && To.Z >= other.To.Z;
 
-    public List<Line3D> Explode(Line3D other)
+    public List<Line3D<T>> Explode(Line3D<T> other)
     {
         if (!HasOverlapWith(other))
             return [this];
@@ -56,7 +58,7 @@ public readonly struct Line3D(Point3D from, Point3D to) : IEquatable<Line3D>
         if (this == other)
             return [];
 
-        List<Line3D> subCuboids = [];
+        List<Line3D<T>> subCuboids = [];
         var remainder = this;
 
         if (remainder.From.X < other.From.X)
@@ -67,7 +69,7 @@ public readonly struct Line3D(Point3D from, Point3D to) : IEquatable<Line3D>
 
         if (other.To.X < remainder.To.X)
         {
-            (remainder, var right) = remainder.SliceLeftOfX(other.To.X + 1);
+            (remainder, var right) = remainder.SliceLeftOfX(other.To.X + T.One);
             subCuboids.Add(right);
         }
 
@@ -79,7 +81,7 @@ public readonly struct Line3D(Point3D from, Point3D to) : IEquatable<Line3D>
 
         if (other.To.Y < remainder.To.Y)
         {
-            (remainder, var right) = remainder.SliceLeftOfY(other.To.Y + 1);
+            (remainder, var right) = remainder.SliceLeftOfY(other.To.Y + T.One);
             subCuboids.Add(right);
         }
 
@@ -91,7 +93,7 @@ public readonly struct Line3D(Point3D from, Point3D to) : IEquatable<Line3D>
 
         if (other.To.Z < remainder.To.Z)
         {
-            (remainder, var right) = remainder.SliceLeftOfZ(other.To.Z + 1);
+            (remainder, var right) = remainder.SliceLeftOfZ(other.To.Z + T.One);
             subCuboids.Add(right);
         }
 
@@ -101,51 +103,51 @@ public readonly struct Line3D(Point3D from, Point3D to) : IEquatable<Line3D>
         return subCuboids;
     }
 
-    public (Line3D, Line3D) SliceLeftOfX(int x)
+    public (Line3D<T>, Line3D<T>) SliceLeftOfX(T x)
     {
-        Point3D leftTo = new(x - 1, To.Y, To.Z);
-        Line3D left = new(From, leftTo);
+        Point3D<T> leftTo = new(x - T.One, To.Y, To.Z);
+        Line3D<T> left = new(From, leftTo);
 
-        Point3D rightFrom = new(x, From.Y, From.Z);
-        Line3D right = new(rightFrom, To);
+        Point3D<T> rightFrom = new(x, From.Y, From.Z);
+        Line3D<T> right = new(rightFrom, To);
 
         return (left, right);
     }
 
-    public (Line3D, Line3D) SliceLeftOfY(int y)
+    public (Line3D<T>, Line3D<T>) SliceLeftOfY(T y)
     {
-        Point3D leftTo = new(To.X, y - 1, To.Z);
-        Line3D left = new(From, leftTo);
+        Point3D<T> leftTo = new(To.X, y - T.One, To.Z);
+        Line3D<T> left = new(From, leftTo);
 
-        Point3D rightFrom = new(From.X, y, From.Z);
-        Line3D right = new(rightFrom, To);
+        Point3D<T> rightFrom = new(From.X, y, From.Z);
+        Line3D<T> right = new(rightFrom, To);
 
         return (left, right);
     }
 
-    public (Line3D, Line3D) SliceLeftOfZ(int z)
+    public (Line3D<T>, Line3D<T>) SliceLeftOfZ(T z)
     {
-        Point3D leftTo = new(To.X, To.Y, z - 1);
-        Line3D left = new(From, leftTo);
+        Point3D<T> leftTo = new(To.X, To.Y, z - T.One);
+        Line3D<T> left = new(From, leftTo);
 
-        Point3D rightFrom = new(From.X, From.Y, z);
-        Line3D right = new(rightFrom, To);
+        Point3D<T> rightFrom = new(From.X, From.Y, z);
+        Line3D<T> right = new(rightFrom, To);
 
         return (left, right);
     }
 
     public override bool Equals(object? obj) =>
-        obj is Line3D cube && Equals(cube);
+        obj is Line3D<T> cube && Equals(cube);
 
-    public bool Equals(Line3D other) =>
+    public bool Equals(Line3D<T> other) =>
         From == other.From && To == other.To;
 
     public override int GetHashCode() =>
         HashCode.Combine(From, To);
 
-    public static bool operator ==(Line3D left, Line3D right) =>
+    public static bool operator ==(Line3D<T> left, Line3D<T> right) =>
         left.Equals(right);
 
-    public static bool operator !=(Line3D left, Line3D right) =>
+    public static bool operator !=(Line3D<T> left, Line3D<T> right) =>
         !left.Equals(right);
 }

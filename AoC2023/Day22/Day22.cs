@@ -2,8 +2,8 @@ namespace AoC2023.Day22;
 
 public class Day22 : IMDay
 {
-    private Dictionary<Line3D, List<Line3D>>? _supporting = null;
-    private Dictionary<Line3D, Line3D[]>? _supportedBy = null;
+    private Dictionary<Line3D<int>, List<Line3D<int>>>? _supporting = null;
+    private Dictionary<Line3D<int>, Line3D<int>[]>? _supportedBy = null;
 
     public string FilePath { private get; init; } = "Day22\\input.txt";
 
@@ -25,7 +25,7 @@ public class Day22 : IMDay
         var totalFallen = 0;
         foreach (var brick in _supportedBy.Keys)
         {
-            HashSet<Line3D> fallen = [brick];
+            HashSet<Line3D<int>> fallen = [brick];
             LetBrickFall(brick, fallen);
             totalFallen += fallen.Count - 1;
         }
@@ -33,7 +33,7 @@ public class Day22 : IMDay
         return totalFallen.ToString();
     }
 
-    private void LetBrickFall(Line3D line, HashSet<Line3D> fallen)
+    private void LetBrickFall(Line3D<int> line, HashSet<Line3D<int>> fallen)
     {
         if (!_supporting!.TryGetValue(line, out var supported))
             return;
@@ -45,16 +45,16 @@ public class Day22 : IMDay
             LetBrickFall(next, fallen);
     }
 
-    private static (Dictionary<Line3D, List<Line3D>> supporting, Dictionary<Line3D, Line3D[]> supportedBy) GetStack(IEnumerable<Line3D> lines)
+    private static (Dictionary<Line3D<int>, List<Line3D<int>>> supporting, Dictionary<Line3D<int>, Line3D<int>[]> supportedBy) GetStack(IEnumerable<Line3D<int>> lines)
     {
-        HashSet<Line3D> fallen = [new(new(-1, -1, -1), new(-1, -1, -1))]; // Add dummy so that Max() won't complain
-        Dictionary<Line3D, List<Line3D>> supporting = [];
-        Dictionary<Line3D, Line3D[]> supportedBy = [];
+        HashSet<Line3D<int>> fallen = [new(new(-1, -1, -1), new(-1, -1, -1))]; // Add dummy so that Max() won't complain
+        Dictionary<Line3D<int>, List<Line3D<int>>> supporting = [];
+        Dictionary<Line3D<int>, Line3D<int>[]> supportedBy = [];
 
         foreach (var line in lines.OrderBy(c => c.From.Z))
         {
             var newZ = 1 + fallen.Max(l => l.HasOverlapOnXAndYWith(line) ? l.To.Z : 0);
-            Line3D newLine = new(new(line.From.X, line.From.Y, newZ), new(line.To.X, line.To.Y, newZ + (line.To.Z - line.From.Z)));
+            Line3D<int> newLine = new(new(line.From.X, line.From.Y, newZ), new(line.To.X, line.To.Y, newZ + (line.To.Z - line.From.Z)));
 
             var lower = fallen
                 .Where(l => l.HasOverlapOnXAndYWith(newLine) && l.To.Z + 1 == newLine.From.Z)
@@ -70,13 +70,13 @@ public class Day22 : IMDay
         return (supporting, supportedBy);
     }
 
-    private async Task<Line3D[]> GetInput() =>
+    private async Task<Line3D<int>[]> GetInput() =>
         (await FileParser.ReadLinesAsStringArray(FilePath, "~"))
         .Select(l => l.Select(p =>
         {
             var (x, y, z) = p.Split(",");
-            return new Point3D(x!.ParseToInt(), y!.ParseToInt(), z!.ParseToInt());
+            return new Point3D<int>(x!.ParseToInt(), y!.ParseToInt(), z!.ParseToInt());
         }).ToArray())
-        .Select(l => new Line3D(l[0], l[1]))
+        .Select(l => new Line3D<int>(l[0], l[1]))
         .ToArray();
 }

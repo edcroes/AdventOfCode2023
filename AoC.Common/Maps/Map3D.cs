@@ -1,17 +1,12 @@
 ﻿namespace AoC.Common.Maps;
 
-public class Map3D<T>
+public class Map3D<T>(int x, int y, int z)
 {
-    private readonly T[,,] _map;
+    private readonly T[,,] _map = new T[z, y, x];
 
     public int SizeX => _map.GetLength(2);
     public int SizeY => _map.GetLength(1);
     public int SizeZ => _map.GetLength(0);
-
-    public Map3D(int x, int y, int z)
-    {
-        _map = new T[z, y, x];
-    }
 
     public void PlaceInMiddle(T[,] initialState)
     {
@@ -28,7 +23,7 @@ public class Map3D<T>
         }
     }
 
-    public T GetValueOrDefault(Point3D point, T defaultValue = default)
+    public T GetValueOrDefault(Point3D<int> point, T defaultValue = default)
     {
         return GetValueOrDefault(point.X, point.Y, point.Z, defaultValue);
     }
@@ -43,7 +38,7 @@ public class Map3D<T>
         return GetValue(x, y, z);
     }
 
-    public T GetValue(Point3D point)
+    public T GetValue(Point3D<int> point)
     {
         return GetValue(point.X, point.Y, point.Z);
     }
@@ -58,7 +53,7 @@ public class Map3D<T>
         _map[z, y, x] = value;
     }
 
-    public void SetValue(Point3D point, T value)
+    public void SetValue(Point3D<int> point, T value)
     {
         SetValue(point.X, point.Y, point.Z, value);
     }
@@ -68,9 +63,9 @@ public class Map3D<T>
         DistributeChaos(aliveValue, (map, point) => NumberOfStraightAndDiagonalNeighborsThatMatch(map, point, aliveValue), getNewValue);
     }
 
-    public void DistributeChaos(T aliveValue, Func<Map3D<T>, Point3D, int> getNumberOfNeighborsThatMatch, Func<bool, int, T> getNewValue)
+    public void DistributeChaos(T aliveValue, Func<Map3D<T>, Point3D<int>, int> getNumberOfNeighborsThatMatch, Func<bool, int, T> getNewValue)
     {
-        var pointsToChange = new Dictionary<Point3D, T>();
+        var pointsToChange = new Dictionary<Point3D<int>, T>();
 
         for (int z = 0; z < SizeZ; z++)
         {
@@ -78,7 +73,7 @@ public class Map3D<T>
             {
                 for (int x = 0; x < SizeX; x++)
                 {
-                    var currentPoint = new Point3D(x, y, z);
+                    var currentPoint = new Point3D<int>(x, y, z);
                     var currentValue = GetValue(currentPoint);
                     var matches = getNumberOfNeighborsThatMatch(this, currentPoint);
 
@@ -97,9 +92,9 @@ public class Map3D<T>
         }
     }
 
-    public IEnumerable<Point3D> GetStraightNeighbors(Point3D point)
+    public IEnumerable<Point3D<int>> GetStraightNeighbors(Point3D<int> point)
     {
-        var neighbors = new Point3D[]
+        var neighbors = new Point3D<int>[]
         {
             new (point.X - 1, point.Y, point.Z),
             new (point.X, point.Y - 1, point.Z),
@@ -112,16 +107,16 @@ public class Map3D<T>
         return neighbors.Where(p => Contains(p));
     }
 
-    public int NumberOfStraightNeighborsThatMatch(Point3D point, T valueToMatch)
+    public int NumberOfStraightNeighborsThatMatch(Point3D<int> point, T valueToMatch)
     {
         var neighbors = GetStraightNeighbors(point);
 
         return neighbors.Count(n => valueToMatch.Equals(GetValueOrDefault(n)));
     }
 
-    public int NumberOfStraightNeighborsThatMatchWithoutBorders(Point3D point, T valueToMatch, T defaultValue = default)
+    public int NumberOfStraightNeighborsThatMatchWithoutBorders(Point3D<int> point, T valueToMatch, T defaultValue = default)
     {
-        var neighbors = new Point3D[]
+        var neighbors = new Point3D<int>[]
         {
             new (point.X - 1, point.Y, point.Z),
             new (point.X, point.Y - 1, point.Z),
@@ -134,12 +129,12 @@ public class Map3D<T>
         return neighbors.Count(n => valueToMatch.Equals(GetValueOrDefault(n, defaultValue)));
     }
 
-    public int NumberOfStraightAndDiagonalNeighborsThatMatch(Point3D point, T valueToMatch)
+    public int NumberOfStraightAndDiagonalNeighborsThatMatch(Point3D<int> point, T valueToMatch)
     {
         return NumberOfStraightAndDiagonalNeighborsThatMatch(this, point, valueToMatch);
     }
 
-    private static int NumberOfStraightAndDiagonalNeighborsThatMatch(Map3D<T> map, Point3D point, T valueToMatch)
+    private static int NumberOfStraightAndDiagonalNeighborsThatMatch(Map3D<T> map, Point3D<int> point, T valueToMatch)
     {
         var numberOfMatches = 0;
 
@@ -205,6 +200,6 @@ public class Map3D<T>
         return row.ToArray();
     }
 
-    public bool Contains(Point3D point) =>
+    public bool Contains(Point3D<int> point) =>
         point.X >= 0 && point.X < SizeX && point.Y >= 0 && point.Y < SizeY && point.Z >= 0 && point.Z < SizeZ;
 }

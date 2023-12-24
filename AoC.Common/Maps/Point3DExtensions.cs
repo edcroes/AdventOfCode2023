@@ -1,20 +1,30 @@
-﻿namespace AoC.Common.Maps;
+﻿using System.Numerics;
+
+namespace AoC.Common.Maps;
 
 public static class Point3DExtensions
 {
-    public static Point3D MirrorX(this Point3D point) => new(point.X * -1, point.Y, point.Z);
+    public static Point3D<T> MirrorX<T>(this Point3D<T> point) where T : INumber<T> =>
+        new(point.X * -T.One, point.Y, point.Z);
 
-    public static Point3D MirrorY(this Point3D point) => new(point.X, point.Y * -1, point.Z);
+    public static Point3D<T> MirrorY<T>(this Point3D<T> point) where T : INumber<T> =>
+        new(point.X, point.Y * -T.One, point.Z);
 
-    public static Point3D MirrorZ(this Point3D point) => new(point.X, point.Y, point.Z * -1);
+    public static Point3D<T> MirrorZ<T>(this Point3D<T> point) where T : INumber<T> =>
+        new(point.X, point.Y, point.Z * -T.One);
 
-    public static Point3D RotateX(this Point3D point) => new(point.Y, point.X * -1, point.Z);
+    public static Point3D<T> RotateX<T>(this Point3D<T> point) where T : INumber<T> =>
+        new(point.Y, point.X * -T.One, point.Z);
 
-    public static Point3D RotateY(this Point3D point) => new(point.Z * -1, point.Y, point.X);
+    public static Point3D<T> RotateY<T>(this Point3D<T> point) where T : INumber<T> =>
+        new(point.Z * -T.One, point.Y, point.X);
 
-    public static Point3D RotateZ(this Point3D point) => new(point.X, point.Z * -1, point.Y);
+    public static Point3D<T> RotateZ<T>(this Point3D<T> point) where T : INumber<T> =>
+        new(point.X, point.Z * -T.One, point.Y);
 
-    public static Point3D MoveBy(this Point3D point, Point3D moveBy) => point + moveBy;
+    public static Point3D<T> MoveBy<T>(this Point3D<T> point, Point3D<T> moveBy) where T : INumber<T> =>
+        point + moveBy;
 
-    public static int GetManhattenDistance(this Point3D point, Point3D other) => Math.Abs(point.X - other.X) + Math.Abs(point.Y - other.Y) + Math.Abs(point.Z - other.Z);
+    public static T GetManhattenDistance<T>(this Point3D<T> point, Point3D<T> other) where T : INumber<T> =>
+        T.Abs(point.X - other.X) + T.Abs(point.Y - other.Y) + T.Abs(point.Z - other.Z);
 }

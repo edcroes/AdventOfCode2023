@@ -1,4 +1,6 @@
-﻿namespace AoC.Common.Files;
+﻿using System.Numerics;
+
+namespace AoC.Common.Files;
 
 public static class LineParser
 {
@@ -26,10 +28,16 @@ public static class LineParser
             .Select(c => c == trueValue)
             .ToArray();
 
-    public static Point3D ToPoint3D(this string line, string separator)
+    public static T[] ToArray<T>(this string line, string separator) where T : INumber<T> =>
+        line
+            .Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(c => T.Parse(c.ToString(), null))
+            .ToArray();
+
+    public static Point3D<T> ToPoint3D<T>(this string line, string separator) where T : INumber<T>
     {
-        var (x, y, z) = line.ToIntArray(separator);
-        return new(x, y, z);
+        var (x, y, z) = line.ToArray<T>(separator);
+        return new(x!, y!, z!);
     }
 
     public static string[] ToStringArray(this string line, string separator) =>

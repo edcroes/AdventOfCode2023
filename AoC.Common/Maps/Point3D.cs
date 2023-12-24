@@ -1,29 +1,14 @@
-﻿namespace AoC.Common.Maps;
+﻿using System.Numerics;
 
-public readonly struct Point3D(int x, int y, int z) : IEquatable<Point3D>
+namespace AoC.Common.Maps;
+
+public readonly record struct Point3D<T>(T X, T Y, T Z) where T : INumber<T>
 {
-    public int X { get; } = x;
-    public int Y { get; } = y;
-    public int Z { get; } = z;
-
-    public static Point3D Empty => new(0, 0, 0);
-
-    public override bool Equals(object? obj)
-    {
-        return obj is Point3D p && Equals(p);
-    }
-
-    public bool Equals(Point3D other) => X == other.X && Y == other.Y && Z == other.Z;
-
-    public override int GetHashCode() => HashCode.Combine(X, Y, Z);
+    public static Point3D<T> Empty => new(T.Zero, T.Zero, T.Zero);
 
     public override string ToString() => $"({X}, {Y}, {Z})";
 
-    public static bool operator ==(Point3D left, Point3D right) => left.Equals(right);
+    public static Point3D<T> operator +(Point3D<T> left, Point3D<T> right) => new(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
 
-    public static bool operator !=(Point3D left, Point3D right) => !left.Equals(right);
-
-    public static Point3D operator +(Point3D left, Point3D right) => new(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
-
-    public static Point3D operator -(Point3D left, Point3D right) => new(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+    public static Point3D<T> operator -(Point3D<T> left, Point3D<T> right) => new(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
 }

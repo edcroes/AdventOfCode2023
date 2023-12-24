@@ -1,31 +1,33 @@
-﻿namespace AoC.Common.Maps;
+﻿using System.Numerics;
 
-public class Space3D
+namespace AoC.Common.Maps;
+
+public class Space3D<T> where T : INumber<T>
 {
-    private readonly List<Point3D> _points = new();
-    private int[] _cornerPointIndeces = Array.Empty<int>();
+    private readonly List<Point3D<T>> _points = new();
+    private int[] _cornerPointIndeces = [];
 
     public string Name { get; init; } = "unnamed";
 
-    public Point3D Center { get; private set; } = new(0, 0, 0);
+    public Point3D<T> Center { get; private set; } = new(T.Zero, T.Zero, T.Zero);
 
     public Space3D() { }
 
-    public Space3D(IEnumerable<Point3D> points)
+    public Space3D(IEnumerable<Point3D<T>> points)
     {
         AddRange(points);
     }
 
-    public IReadOnlyList<Point3D> Points => _points;
-    public IReadOnlyList<Point3D> CornerPoints => _cornerPointIndeces.Select(i => _points[i]).ToList();
+    public IReadOnlyList<Point3D<T>> Points => _points;
+    public IReadOnlyList<Point3D<T>> CornerPoints => _cornerPointIndeces.Select(i => _points[i]).ToList();
 
-    public void Add(Point3D point)
+    public void Add(Point3D<T> point)
     {
         AddPoint(point);
         ReindexCorners();
     }
 
-    public void AddRange(IEnumerable<Point3D> points)
+    public void AddRange(IEnumerable<Point3D<T>> points)
     {
         foreach (var point in points)
         {
@@ -35,7 +37,7 @@ public class Space3D
         ReindexCorners();
     }
 
-    public Space3D RotateX()
+    public Space3D<T> RotateX()
     {
         for (var i = 0; i < _points.Count; i++)
         {
@@ -46,7 +48,7 @@ public class Space3D
         return this;
     }
 
-    public Space3D RotateY()
+    public Space3D<T> RotateY()
     {
         for (var i = 0; i < _points.Count; i++)
         {
@@ -57,7 +59,7 @@ public class Space3D
         return this;
     }
 
-    public Space3D RotateZ()
+    public Space3D<T> RotateZ()
     {
         for (var i = 0; i < _points.Count; i++)
         {
@@ -68,7 +70,7 @@ public class Space3D
         return this;
     }
 
-    public Space3D MoveBy(Point3D moveBy)
+    public Space3D<T> MoveBy(Point3D<T> moveBy)
     {
         for (var i = 0; i < _points.Count; i++)
         {
@@ -79,7 +81,7 @@ public class Space3D
         return this;
     }
 
-    private void AddPoint(Point3D point)
+    private void AddPoint(Point3D<T> point)
     {
         if (!_points.Contains(point))
         {
@@ -90,14 +92,14 @@ public class Space3D
     private void ReindexCorners()
     {
         var cornerPoints = new[] {
-            _points.Where(p => (p - Center).X < 0 && (p - Center).Y < 0 && (p - Center).Z < 0).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
-            _points.Where(p => (p - Center).X < 0 && (p - Center).Y < 0 && (p - Center).Z > 0).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
-            _points.Where(p => (p - Center).X < 0 && (p - Center).Y > 0 && (p - Center).Z < 0).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
-            _points.Where(p => (p - Center).X > 0 && (p - Center).Y < 0 && (p - Center).Z < 0).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
-            _points.Where(p => (p - Center).X < 0 && (p - Center).Y > 0 && (p - Center).Z > 0).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
-            _points.Where(p => (p - Center).X > 0 && (p - Center).Y < 0 && (p - Center).Z > 0).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
-            _points.Where(p => (p - Center).X > 0 && (p - Center).Y > 0 && (p - Center).Z < 0).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
-            _points.Where(p => (p - Center).X > 0 && (p - Center).Y > 0 && (p - Center).Z > 0).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault()
+            _points.Where(p => (p - Center).X < T.Zero && (p - Center).Y < T.Zero && (p - Center).Z < T.Zero).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
+            _points.Where(p => (p - Center).X < T.Zero && (p - Center).Y < T.Zero && (p - Center).Z > T.Zero).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
+            _points.Where(p => (p - Center).X < T.Zero && (p - Center).Y > T.Zero && (p - Center).Z < T.Zero).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
+            _points.Where(p => (p - Center).X > T.Zero && (p - Center).Y < T.Zero && (p - Center).Z < T.Zero).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
+            _points.Where(p => (p - Center).X < T.Zero && (p - Center).Y > T.Zero && (p - Center).Z > T.Zero).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
+            _points.Where(p => (p - Center).X > T.Zero && (p - Center).Y < T.Zero && (p - Center).Z > T.Zero).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
+            _points.Where(p => (p - Center).X > T.Zero && (p - Center).Y > T.Zero && (p - Center).Z < T.Zero).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault(),
+            _points.Where(p => (p - Center).X > T.Zero && (p - Center).Y > T.Zero && (p - Center).Z > T.Zero).OrderBy(p => p.GetManhattenDistance(Center)).LastOrDefault()
         };
 
         _cornerPointIndeces = cornerPoints

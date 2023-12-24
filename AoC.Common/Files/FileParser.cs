@@ -1,4 +1,6 @@
-﻿namespace AoC.Common.Files;
+﻿using System.Numerics;
+
+namespace AoC.Common.Files;
 
 public static class FileParser
 {
@@ -35,9 +37,9 @@ public static class FileParser
         (await File.ReadAllTextAsync(filePath))
             .ToIntArray(separator);
 
-    public static async Task<Point3D[]> ReadLinesAsPoint3D(string filePath, string separator) =>
+    public static async Task<Point3D<T>[]> ReadLinesAsPoint3D<T>(string filePath, string separator) where T : INumber<T> =>
         (await File.ReadAllLinesAsync(filePath))
-            .Select(l => l.ToPoint3D(separator))
+            .Select(l => l.ToPoint3D<T>(separator))
             .ToArray();
 
     public static async Task<string> ReadLineAsString(string filePath) =>

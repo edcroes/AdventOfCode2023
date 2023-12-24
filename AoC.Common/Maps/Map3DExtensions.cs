@@ -2,9 +2,9 @@
 
 public static class Map3DExtensions
 {
-    public static IEnumerable<Point3D> Where<T>(this Map3D<T> map, Func<Point3D, T, bool> predicate)
+    public static IEnumerable<Point3D<int>> Where<T>(this Map3D<T> map, Func<Point3D<int>, T, bool> predicate)
     {
-        List<Point3D> points = new();
+        List<Point3D<int>> points = [];
 
         for (var z = 0; z < map.SizeZ; z++)
         {
@@ -12,7 +12,7 @@ public static class Map3DExtensions
             {
                 for (var x = 0; x < map.SizeX; x++)
                 {
-                    Point3D point = new(x, y, z);
+                    Point3D<int> point = new(x, y, z);
                     if (predicate(point, map.GetValue(point)))
                     {
                         points.Add(point);
@@ -24,7 +24,7 @@ public static class Map3DExtensions
         return points;
     }
 
-    public static bool All<T>(this Map3D<T> map, Func<Point3D, T, bool> predicate)
+    public static bool All<T>(this Map3D<T> map, Func<Point3D<int>, T, bool> predicate)
     {
         for (var z = 0; z < map.SizeZ; z++)
         {
@@ -32,7 +32,7 @@ public static class Map3DExtensions
             {
                 for (var x = 0; x < map.SizeX; x++)
                 {
-                    Point3D point = new(x, y, z);
+                    Point3D<int> point = new(x, y, z);
                     if (!predicate(point, map.GetValue(point)))
                     {
                         return false;
@@ -44,7 +44,7 @@ public static class Map3DExtensions
         return true;
     }
 
-    public static bool Any<T>(this Map3D<T> map, Func<Point3D, T, bool> predicate)
+    public static bool Any<T>(this Map3D<T> map, Func<Point3D<int>, T, bool> predicate)
     {
         for (var z = 0; z < map.SizeZ; z++)
         {
@@ -52,7 +52,7 @@ public static class Map3DExtensions
             {
                 for (var x = 0; x < map.SizeX; x++)
                 {
-                    Point3D point = new(x, y, z);
+                    Point3D<int> point = new(x, y, z);
                     if (predicate(point, map.GetValue(point)))
                     {
                         return true;
