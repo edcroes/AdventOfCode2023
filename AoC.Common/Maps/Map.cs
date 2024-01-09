@@ -1,6 +1,8 @@
-﻿namespace AoC.Common.Maps;
+﻿using CommunityToolkit.HighPerformance;
 
-public class Map<T>
+namespace AoC.Common.Maps;
+
+public class Map<T> where T : notnull
 {
     private T[,] _map;
 
@@ -171,20 +173,19 @@ public class Map<T>
 
     public IEnumerable<Point> GetStraightNeighbors(Point point)
     {
-        var neighbors = new Point[]
-        {
-                new Point(point.X - 1, point.Y),
-                new Point(point.X, point.Y - 1),
-                new Point(point.X + 1, point.Y),
-                new Point(point.X, point.Y + 1)
-        };
+        Point[] neighbors = [
+            new(point.X - 1, point.Y),
+            new(point.X, point.Y - 1),
+            new(point.X + 1, point.Y),
+            new(point.X, point.Y + 1)
+        ];
 
         return neighbors.Where(Contains);
     }
 
     public IEnumerable<Point> GetStraightAndDiagonalNeighbors(Point point)
     {
-        List<Point> neighbors = new();
+        List<Point> neighbors = [];
 
         for (int y = Math.Max(point.Y - 1, 0); y <= point.Y + 1 && y < SizeY; y++)
         {
@@ -204,26 +205,24 @@ public class Map<T>
 
     public int NumberOfStraightNeighborsThatMatch(Point point, Func<T, T?, bool> matcher, T? outOfBoundsValue = default)
     {
-        var neighbors = new Point[]
-        {
-                new Point(point.X - 1, point.Y),
-                new Point(point.X, point.Y - 1),
-                new Point(point.X + 1, point.Y),
-                new Point(point.X, point.Y + 1)
-        };
+        Point[] neighbors = [
+            new(point.X - 1, point.Y),
+            new(point.X, point.Y - 1),
+            new(point.X + 1, point.Y),
+            new(point.X, point.Y + 1)
+        ];
 
         return neighbors.Count(n => matcher(GetValue(point), GetValueOrDefault(n.X, n.Y, outOfBoundsValue)));
     }
 
     public int NumberOfStraightNeighborsThatMatch(Point point, T valueToMatch)
     {
-        var neighbors = new Point[]
-        {
-                new Point(point.X - 1, point.Y),
-                new Point(point.X, point.Y - 1),
-                new Point(point.X + 1, point.Y),
-                new Point(point.X, point.Y + 1)
-        };
+        Point[] neighbors = [
+            new(point.X - 1, point.Y),
+            new(point.X, point.Y - 1),
+            new(point.X + 1, point.Y),
+            new(point.X, point.Y + 1)
+        ];
 
         return neighbors.Count(n => valueToMatch.Equals(GetValueOrDefault(n.X, n.Y)));
     }
@@ -285,6 +284,8 @@ public class Map<T>
     }
 
     public T[,] To2DArray() => (T[,])_map.Clone();
+
+    public ReadOnlySpan2D<T> ToReadOnlySpan2D() => new(_map);
 
     public bool Contains(T value)
     {

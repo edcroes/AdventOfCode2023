@@ -13,4 +13,19 @@ public static class PointExtensions
 
     public static bool IsTouching(this Point point, Point other) =>
         Math.Abs(point.X - other.X) <= 1 && Math.Abs(point.Y - other.Y) <= 1;
+
+    public static Point<long> ToLongPoint(this Point point) =>
+        new(point.X, point.Y);
+
+    public static Point ToPoint(this Point<long> point)
+    {
+        if (point.X > int.MaxValue || point.X < int.MinValue ||
+            point.Y > int.MaxValue || point.Y < int.MinValue)
+        {
+            throw new ArgumentOutOfRangeException(nameof(point));
+        }
+
+        return new((int)point.X, (int)point.Y);
+    }
+
 }

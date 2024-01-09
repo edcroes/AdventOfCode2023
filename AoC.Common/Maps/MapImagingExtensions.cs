@@ -23,10 +23,10 @@ public static class MapImagingExtensions
         { (new(-1, 0), new(0, -1)), ([new(0, -1), new(1, -1), new(1, 0)], []) }
     };
 
-    public static Map<T> DrawShape<T>(this Map<T> map, IEnumerable<Point> border, T borderValue) =>
+    public static Map<T> DrawShape<T>(this Map<T> map, IEnumerable<Point> border, T borderValue) where T : notnull =>
         map.DrawShape(border, _ => borderValue);
 
-    public static Map<T> DrawShape<T>(this Map<T> map, IEnumerable<Point> border, Func<Point, T> getBorderValue)
+    public static Map<T> DrawShape<T>(this Map<T> map, IEnumerable<Point> border, Func<Point, T> getBorderValue) where T : notnull
     {
         ArgumentNullException.ThrowIfNull(map);
         ArgumentNullException.ThrowIfNull(border);
@@ -44,13 +44,13 @@ public static class MapImagingExtensions
         return map;
     }
 
-    public static Map<T> FillShape<T>(this Map<T> map, IEnumerable<Point> border, T borderValue, T fillValue) =>
+    public static Map<T> FillShape<T>(this Map<T> map, IEnumerable<Point> border, T borderValue, T fillValue) where T : notnull =>
         map.FillShape(border, _ => borderValue, _ => fillValue);
 
-    public static Map<T> FillShape<T>(this Map<T> map, IEnumerable<Point> border, Func<Point, T> getBorderValue, T fillValue) =>
+    public static Map<T> FillShape<T>(this Map<T> map, IEnumerable<Point> border, Func<Point, T> getBorderValue, T fillValue) where T : notnull =>
         map.FillShape(border, getBorderValue, _ => fillValue);
 
-    public static Map<T> FillShape<T>(this Map<T> map, IEnumerable<Point> border, Func<Point, T> getBorderValue, Func<Point, T> getFillValue)
+    public static Map<T> FillShape<T>(this Map<T> map, IEnumerable<Point> border, Func<Point, T> getBorderValue, Func<Point, T> getFillValue) where T : notnull
     {
         ArgumentNullException.ThrowIfNull(map);
         ArgumentNullException.ThrowIfNull(border);
@@ -90,7 +90,7 @@ public static class MapImagingExtensions
         return map;
     }
 
-    private static void FloodFill<T>(this Map<T> map, Point from, Func<Point, bool> shouldFill)
+    private static void FloodFill<T>(this Map<T> map, Point from, Func<Point, bool> shouldFill) where T : notnull
     {
         var value = map.GetValue(from);
         var neighbors = map.GetStraightNeighbors(from);
