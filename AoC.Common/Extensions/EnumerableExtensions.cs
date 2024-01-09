@@ -9,4 +9,7 @@ public static class EnumerableExtensions
 
     public static int GetAoCHashCode<T>(this IEnumerable<T> source) =>
         source.Aggregate(0, (result, next) => next is null ? result : HashCode.Combine(result, next.GetHashCode()));
+
+    public static string ToReadableString<T>(this IEnumerable<T> set) =>
+        string.Join(", ", set);
 }

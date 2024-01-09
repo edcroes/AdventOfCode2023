@@ -28,9 +28,9 @@ public static class DictionaryExtensions
 
     public static void AddOrReplaceIfGreaterThan<T>(this IDictionary<T, int> dictionary, T key, int value)
     {
-        if (dictionary.ContainsKey(key))
+        if (dictionary.TryGetValue(key, out int currentValue))
         {
-            if (value > dictionary[key])
+            if (value > currentValue)
             {
                 dictionary[key] = value;
             }
@@ -63,13 +63,33 @@ public static class DictionaryExtensions
 
     public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, List<TValue>> dictionary, TKey key, TValue value)
     {
-        if (dictionary.ContainsKey(key))
+        if (dictionary.TryGetValue(key, out List<TValue>? list))
         {
-            dictionary[key].Add(value);
+            list.Add(value);
         }
         else
         {
-            dictionary.Add(key, new List<TValue> { value });
+            dictionary.Add(key, [value]);
+        }
+    }
+
+    public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, HashSet<TValue>> dictionary, TKey key, IEnumerable<TValue> values)
+    {
+        foreach (var value in values)
+        {
+            dictionary.AddOrUpdate(key, value);
+        }
+    }
+
+    public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, HashSet<TValue>> dictionary, TKey key, TValue value)
+    {
+        if (dictionary.TryGetValue(key, out HashSet<TValue>? set))
+        {
+            set.Add(value);
+        }
+        else
+        {
+            dictionary.Add(key, [value]);
         }
     }
 

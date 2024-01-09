@@ -1,85 +1,95 @@
 ﻿namespace AoC.Common.Graphs;
 
-public class WeightedGraph<T> where T : IEdge
+public class WeightedGraph<T> where T : notnull
 {
-    public readonly Dictionary<T, List<T>> _edges = new();
+    private readonly Dictionary<T, HashSet<T>> _neighbors = [];
+    private readonly Dictionary<(T from, T to), int> _edges = [];
 
-    public IReadOnlyList<T> Edges => _edges.Keys.ToList();
+    public IReadOnlyList<T> Vertices => _neighbors.Keys.ToList();
 
-    public void AddEdge(T from, T to)
+    public IReadOnlyDictionary<(T from, T to), int> Edges => _edges;
+
+    public void AddEdge(T from, T to, int weigth)
     {
-        if (!_edges.TryGetValue(from, out List<T>? fromList) || !fromList.Contains(to))
-            _edges.AddOrUpdate(from, to);
+        ArgumentNullException.ThrowIfNull(from, nameof(from));
+        ArgumentNullException.ThrowIfNull(to, nameof(to));
 
-        if (!_edges.TryGetValue(to, out List<T>? toList) || !toList.Contains(from))
-            _edges.AddOrUpdate(to, from);
-    }
+        var (first, second) = GetPair(from, to);
 
-    public void AddDirectedEdge(T from, T to)
-    {
-        if (!_edges.TryGetValue(from, out List<T>? fromList) || !fromList.Contains(to))
-            _edges.AddOrUpdate(from, to);
-    }
-
-    public int GetShortestPath(T from, T to)
-    {
-        Dictionary<T, int> currentCostPerEdge = new();
-        HashSet<T> visitedPoints = new();
-        PriorityQueue<T, int> openPositions = new();
-        openPositions.Enqueue(from, 0);
-
-        while (currentCostPerEdge.GetValueOrDefault(to, 0) == 0)
+        if (!_edges.ContainsKey((first, second)))
         {
-            var edge = openPositions.Dequeue();
-            var cost = currentCostPerEdge.GetValueOrDefault(edge, 0);
+            _edges.Add((first, second), weigth);
+            _neighbors.AddOrUpdate(from, to);
+            _neighbors.AddOrUpdate(to, from);
+        }
+    }
 
-            visitedPoints.Add(edge);
-            var nextEdges = _edges[edge].Where(e => !visitedPoints.Contains(e));
+    public void RemoveEdge(T from, T to)
+    {
+        ArgumentNullException.ThrowIfNull(from, nameof(from));
+        ArgumentNullException.ThrowIfNull(to, nameof(to));
 
-            foreach (var nextEdge in nextEdges)
-            {
-                var nextCost = nextEdge.Weight + cost;
-                var currentCost = currentCostPerEdge.GetValueOrDefault(nextEdge, 0);
-                if (currentCost == 0 || nextCost < currentCost)
-                {
-                    currentCostPerEdge.AddOrUpdate(nextEdge, nextCost);
-                    openPositions.Enqueue(nextEdge, nextCost);
-                }
-            }
+        var (first, second) = GetPair(from, to);
+        if (_edges.Remove((first, second)))
+        {
+            _neighbors[from].Remove(to);
+            _neighbors[to].Remove(from);
+
+            if (_neighbors[from].Count == 0)
+                _neighbors.Remove(from);
+
+            if (_neighbors[to].Count == 0)
+                _neighbors.Remove(to);
+        }
+    }
+
+    public int? GetEdgeWeight(T from, T to) =>
+        TryGetValue(_edges, from, to, out var result) ? result : null;
+
+    public IReadOnlySet<T> GetNeighbors(T vertex) =>
+        _neighbors.TryGetValue(vertex, out var neighbors)
+            ? neighbors
+            : [];
+
+    public void MergeVertices(T first, T second)
+    {
+        RemoveEdge(first, second);
+        var neighbors = GetNeighbors(first)
+            .Union(GetNeighbors(second))
+            .Distinct();
+
+        var mergedVertex = GetMergedVertex(first, second);
+
+        foreach (var neighbor in neighbors)
+        {
+            var weight = (GetEdgeWeight(first, neighbor) ?? 0) + (GetEdgeWeight(second, neighbor) ?? 0);
+            RemoveEdge(first, neighbor);
+            RemoveEdge(second, neighbor);
+            AddEdge(mergedVertex, neighbor, weight);
+        }
+    }
+
+    protected virtual T GetMergedVertex(T first, T second) => first;
+
+    private static (T, T) GetPair(T from, T to)
+    {
+        var first = from.GetHashCode() < to.GetHashCode() ? from : to;
+        var second = first.Equals(from) ? to : from;
+
+        return (first, second);
+    }
+
+    private static bool TryGetValue(Dictionary<(T, T), int> graph, T from, T to, out int result)
+    {
+        var (first, second) = GetPair(from, to);
+
+        if (graph.TryGetValue((first, second), out var weight))
+        {
+            result = weight;
+            return true;
         }
 
-        return currentCostPerEdge[to];
-    }
-
-    public List<List<T>> GetAllPathsWithAllEdges(T start, T to, int maxWeight)
-    {
-        List<List<T>> finishedPaths = new();
-        List<List<T>> openPaths = new() { new() { start } };
-
-        for (var i = 0; i < _edges.Count - 1; i++)
-        {
-            List<List<T>> newPaths = new();
-            foreach (var path in openPaths)
-            {
-                var newEdges = _edges[path[^1]].Where(e => !path.Contains(e));
-                foreach (var newEdge in newEdges)
-                {
-                    List<T> newPath = new(path) { newEdge };
-
-                    if (newPath.Sum(e => e.Weight) < maxWeight)
-                    {
-                        if (to.Equals(newEdge))
-                            finishedPaths.Add(newPath);
-                        else
-                            newPaths.Add(newPath);
-                    }
-
-                    
-                }
-            }
-            openPaths = newPaths;
-        }
-
-        return finishedPaths;
+        result = 0;
+        return false;
     }
 }
