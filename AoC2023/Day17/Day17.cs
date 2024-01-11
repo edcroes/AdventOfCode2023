@@ -76,19 +76,17 @@ public class Day17 : IMDay
         return totalCost;
     }
 
-    private static WeightedPoint[] GetValidNeighborsPart1(Map<int> map, WeightedPoint point) =>
+    private static IEnumerable<WeightedPoint> GetValidNeighborsPart1(Map<int> map, WeightedPoint point) =>
         map.GetStraightNeighbors(point.Point)
             .Where(n => point.Point.Subtract(n) != point.Direction)
             .Select(n => new WeightedPoint(n, n.Subtract(point.Point) == point.Direction ? point.Steps + 1 : 1, n.Subtract(point.Point)))
-            .Where(n => n.Steps < 4)
-            .ToArray();
+            .Where(n => n.Steps < 4);
 
-    private static WeightedPoint[] GetValidNeighborsPart2(Map<int> map, WeightedPoint point) =>
+    private static IEnumerable<WeightedPoint> GetValidNeighborsPart2(Map<int> map, WeightedPoint point) =>
         map.GetStraightNeighbors(point.Point)
             .Where(n => point.Point.Subtract(n) != point.Direction)
             .Select(n => new WeightedPoint(n, n.Subtract(point.Point) == point.Direction ? point.Steps + 1 : 1, n.Subtract(point.Point)))
-            .Where(n => (point.Steps >= 4 || point.Direction == n.Direction) && n.Steps <= 10)
-            .ToArray();
+            .Where(n => (point.Steps >= 4 || point.Direction == n.Direction) && n.Steps <= 10);
 
     private async Task<Map<int>> GetInput() =>
         new(await FileParser.ReadLinesAsIntArray(FilePath));
