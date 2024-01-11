@@ -2,6 +2,11 @@
 
 public static class PointExtensions
 {
+    public static Point Left => new(-1, 0);
+    public static Point Right => new(1, 0);
+    public static Point Up => new(0, -1);
+    public static Point Down => new(0, 1);
+
     public static int GetManhattenDistance(this Point point, Point other) =>
         Math.Abs(point.X - other.X) + Math.Abs(point.Y - other.Y);
 
@@ -27,5 +32,4 @@ public static class PointExtensions
 
         return new((int)point.X, (int)point.Y);
     }
-
 }
