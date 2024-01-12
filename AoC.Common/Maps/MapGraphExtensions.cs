@@ -1,77 +1,72 @@
-﻿namespace AoC.Common.Maps;
+﻿using AoC.Common.Graphs;
 
+namespace AoC.Common.Maps;
 public static class MapGraphExtensions
 {
-    public static int GetShortestPath(this Map<int> map, Point toPoint) =>
-        map.GetShortestPath(new Point(0, 0), toPoint);
-
-    public static int GetShortestPath(this Map<int> map, Point fromPoint, Point toPoint)
+    public static WeightedGraph<Point> ToWeightedGraph<T>(this Map<T> map, Point start, ICollection<T> validPathItems, GraphStrategy strategy = GraphStrategy.KeepShortestPath) where T : notnull
     {
-        var currentCostPerPoint = new Map<int>(map.SizeX, map.SizeY);
-        HashSet<Point> visitedPoints = new();
-        PriorityQueue<Point, int> openPositions = new();
-        openPositions.Enqueue(fromPoint, 0);
+        HashSet<Point> verticesToProcess = [start];
+        HashSet<Point> pointsHit = [start];
+        WeightedGraph<Point> graph = new();
 
-        while (currentCostPerPoint.GetValue(toPoint) == 0)
+        while (verticesToProcess.Count > 0)
         {
-            var point = openPositions.Dequeue();
-            var cost = currentCostPerPoint.GetValue(point);
+            var current = verticesToProcess.First();
+            var neighbors = map.GetStraightNeighbors(current)
+                .Where(n => validPathItems.Contains(map.GetValue(n)));
 
-            visitedPoints.Add(point);
-            var nextPoints = map
-                .GetStraightNeighbors(point)
-                .Where(p => !visitedPoints.Contains(p));
-
-            foreach (var nextPoint in nextPoints)
+            foreach (var neighbor in neighbors)
             {
-                var nextCost = map.GetValue(nextPoint) + cost;
-                var currentCost = currentCostPerPoint.GetValue(nextPoint);
-                if (currentCost == 0 || nextCost < currentCost)
+                if (pointsHit.Contains(neighbor))
+                    continue;
+
+                pointsHit.Add(neighbor);
+
+                var previous = current;
+                var nextNeighbor = current;
+                var steps = 0;
+
+                Point[] nextNeighbors = [neighbor];
+                while (nextNeighbors.Length == 1)
                 {
-                    currentCostPerPoint.SetValue(nextPoint, nextCost);
-                    openPositions.Enqueue(nextPoint, nextCost);
+                    steps++;
+                    previous = nextNeighbor;
+                    nextNeighbor = nextNeighbors[0];
+                    pointsHit.Add(nextNeighbor);
+
+                    // Loop detected
+                    if (nextNeighbor == current)
+                        break;
+
+                    nextNeighbors = map
+                        .GetStraightNeighbors(nextNeighbor)
+                        .Where(n => n != previous && validPathItems.Contains(map.GetValue(n)))
+                        .ToArray();
                 }
+
+                var existingWeight = graph.GetEdgeWeight(current, nextNeighbor);
+                if (existingWeight is not null && (strategy == GraphStrategy.KeepShortestPath && existingWeight > steps) || (strategy == GraphStrategy.KeepLongestPath && existingWeight < steps))
+                {
+                    graph.RemoveEdge(current, nextNeighbor);
+                    graph.AddEdge(current, nextNeighbor, steps);
+                }
+                else if (existingWeight is null)
+                {
+                    graph.AddEdge(current, nextNeighbor, steps);
+                }
+
+                verticesToProcess.Add(nextNeighbor);
             }
+
+            verticesToProcess.Remove(current);
         }
 
-        return currentCostPerPoint.GetValue(toPoint);
+        return graph;
     }
+}
 
-    public static int GetShortestPath<T>(this Map<T> map, Point fromPoint, Point toPoint, Func<Map<T>, Point, Point, bool> canMoveTo)
-    {
-        var currentCostPerPoint = new Map<int>(map.SizeX, map.SizeY);
-        HashSet<Point> visitedPoints = new();
-        PriorityQueue<Point, int> openPositions = new();
-        openPositions.Enqueue(fromPoint, 0);
-
-        while (currentCostPerPoint.GetValue(toPoint) == 0)
-        {
-            if (openPositions.Count == 0)
-            {
-                // Dead end, no route possible
-                return int.MaxValue;
-            }
-
-            var point = openPositions.Dequeue();
-            var cost = currentCostPerPoint.GetValue(point);
-
-            visitedPoints.Add(point);
-            var nextPoints = map
-                .GetStraightNeighbors(point)
-                .Where(p => !visitedPoints.Contains(p) && canMoveTo(map, point, p));
-
-            foreach (var nextPoint in nextPoints)
-            {
-                var nextCost = cost + 1;
-                var currentCost = currentCostPerPoint.GetValue(nextPoint);
-                if (currentCost == 0 || nextCost < currentCost)
-                {
-                    currentCostPerPoint.SetValue(nextPoint, nextCost);
-                    openPositions.Enqueue(nextPoint, nextCost);
-                }
-            }
-        }
-
-        return currentCostPerPoint.GetValue(toPoint);
-    }
+public enum GraphStrategy
+{
+    KeepShortestPath,
+    KeepLongestPath
 }
